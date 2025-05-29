@@ -35,20 +35,16 @@ export async function scrapeRecipe(url) {
             'Upgrade-Insecure-Requests': '1',
         });
         
-        console.log('Navigating to:', url);
         await page.goto(url, {
             waitUntil: 'domcontentloaded',
             timeout: 20000,
         });
 
-        console.log('Page loaded, waiting for content...');
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         const pageTitle = await page.title();
-        console.log('Page title:', pageTitle);
         
         const currentUrl = page.url();
-        console.log('Current URL:', currentUrl);
         
         const recipeData = await getRecipeData(page);
         return recipeData;

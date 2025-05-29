@@ -105,47 +105,29 @@ async function getNutrition(page) {
         
         return nutritionData;
     } catch (error) {
-        console.log('Nutrition section not found, skipping...');
         return {};
     }
 }
 
 export async function getRecipeData(page) {
-    console.log('Starting parallel recipe data extraction...');
-    
     try {
-        // First, wait for key elements to be available
-        await Promise.race([
-            page.waitForSelector('.article-heading', { timeout: 5000 }),
-            page.waitForSelector('.mm-recipes-details__content', { timeout: 5000 })
-        ]);
-        
-        console.log('Page loaded, starting parallel extraction...');
-        
         const [title, details, ingredients, steps, nutrition] = await Promise.allSettled([
             getTitle(page).catch(err => {
-                console.log('Title extraction failed:', err.message);
                 return 'Recipe Title Not Found';
             }),
             getDetails(page).catch(err => {
-                console.log('Details extraction failed:', err.message);
                 return {};
             }),
             getIngredients(page).catch(err => {
-                console.log('Ingredients extraction failed:', err.message);
                 return {};
             }),
             getSteps(page).catch(err => {
-                console.log('Steps extraction failed:', err.message);
                 return [];
             }),
             getNutrition(page).catch(err => {
-                console.log('Nutrition extraction failed:', err.message);
                 return {};
             })
         ]);
-
-        console.log('All extractions completed');
 
         return {
             title: title.status === 'fulfilled' ? title.value : 'Recipe Title Not Found',
@@ -155,7 +137,6 @@ export async function getRecipeData(page) {
             nutrition: nutrition.status === 'fulfilled' ? nutrition.value : {}
         };
     } catch (error) {
-        console.error('Recipe extraction failed:', error);
         throw new Error(`Recipe extraction failed: ${error.message}`);
     }
 }
