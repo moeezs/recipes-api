@@ -5,6 +5,8 @@ import { scrapeRecipe } from './scrape.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.set('trust proxy', 1);
+
 const limiter = rateLimit({
     windowMs: 1 * 60 * 1000,
     max: 5,
