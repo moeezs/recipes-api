@@ -24,12 +24,24 @@ app.get('/api', async (req, res) => {
         return res.status(400).json({ error: 'Invalid or missing Allrecipes URL (must match https://www.allrecipes.com/recipe/ID/NAME/)' });
     }
 
+    const timeoutId = setTimeout(() => {
+        if (!res.headersSent) {
+            res.status(504).json({ error: 'Request timeout - recipe took too long to scrape' });
+        }
+    }, 25000);
+
     try {
         const recipeData = await scrapeRecipe(url);
-        res.json(recipeData);
+        clearTimeout(timeoutId);
+        if (!res.headersSent) {
+            res.json(recipeData);
+        }
     } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: 'Failed to scrape recipe' });
+        clearTimeout(timeoutId);
+        console.error("Error:", error.message);
+        if (!res.headersSent) {
+            res.status(500).json({ error: 'Failed to scrape recipe' });
+        }
     }
 });
 

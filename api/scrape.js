@@ -9,37 +9,42 @@ export async function scrapeRecipe(url) {
     try {
         browser = await puppeteer.launch({
             headless: 'new',
-            timeout: 30000,
+            timeout: 20000,
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-background-timer-throttling',
-                '--disable-backgrounding-occluded-windows',
-                '--disable-renderer-backgrounding',
+                '--disable-gpu',
+                '--disable-web-security',
+                '--disable-extensions',
                 '--no-first-run',
-                '--no-default-browser-check',
-                '--single-process'
+                '--disable-default-apps',
+                '--memory-pressure-off',
+                '--max_old_space_size=4096'
             ],
         });
 
         const page = await browser.newPage();
-
+        
         await page.goto(url, {
-            waitUntil: 'networkidle0',
-            timeout: 45000,
+            waitUntil: 'domcontentloaded',
+            timeout: 20000,
         });
 
-        await page.setViewport({ width: 1080, height: 1024 });
-
+        await page.waitForTimeout(2000);
+        
         const recipeData = await getRecipeData(page);
         return recipeData;
     } catch (error) {
-        console.error("Error:", error);
-        throw error;
+        console.error("Scraping error:", error.message);
+        throw new Error('Failed to scrape recipe');
     } finally {
         if (browser) {
-            await browser.close();
+            try {
+                await browser.close();
+            } catch (closeError) {
+                console.error("Browser close error:", closeError.message);
+            }
         }
     }
 }
