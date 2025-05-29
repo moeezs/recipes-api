@@ -106,11 +106,28 @@ async function getNutrition(page) {
 }
 
 export async function getRecipeData(page) {
+        console.log('Starting recipe data extraction...');
+    
+    const bodyContent = await page.evaluate(() => {
+        const body = document.body.innerText;
+        return body.substring(0, 500); // First 500 chars
+    });
+    console.log('Page content preview:', bodyContent);
+    
     const title = await getTitle(page);
+    console.log('✓ Title extracted');
+    
     const details = await getDetails(page);
+    console.log('✓ Details extracted');
+    
     const ingredients = await getIngredients(page);
+    console.log('✓ Ingredients extracted');
+    
     const steps = await getSteps(page);
+    console.log('✓ Steps extracted');
+    
     const nutrition = await getNutrition(page);
+    console.log('✓ Nutrition extracted');
 
     return {
         title,
