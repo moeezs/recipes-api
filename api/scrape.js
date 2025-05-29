@@ -31,7 +31,7 @@ export async function scrapeRecipe(url) {
             timeout: 20000,
         });
 
-        await page.waitForTimeout(2000);
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
         const recipeData = await getRecipeData(page);
         return recipeData;
