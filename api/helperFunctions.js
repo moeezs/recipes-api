@@ -20,8 +20,6 @@ async function getDetails(page) {
 }
 
 async function getIngredients(page) {
-    let ingredients = {};
-
     await page.waitForSelector('#mm-recipes-structured-ingredients_1-0', { timeout: 30000 });
     const ingredientsContainer = await page.locator('#mm-recipes-structured-ingredients_1-0').waitHandle();
 
@@ -34,7 +32,12 @@ async function getIngredients(page) {
                 if (element.classList.contains('mm-recipes-structured-ingredients__list-heading')) {
                     currentHeading = element.textContent.replace(':', '').trim();
                     result[currentHeading] = [];
-                } else if (element.classList.contains('mm-recipes-structured-ingredients__list') && currentHeading) {
+                } else if (element.classList.contains('mm-recipes-structured-ingredients__list')) {
+                    if (!currentHeading) {
+                        currentHeading = 'Main';
+                        result[currentHeading] = [];
+                    }
+                    
                     const items = element.querySelectorAll('.mm-recipes-structured-ingredients__list-item p');
                     items.forEach(item => {
                         const quantity = item.querySelector('[data-ingredient-quantity]')?.textContent || '';
@@ -44,6 +47,10 @@ async function getIngredients(page) {
                         const ingredient = `${quantity} ${unit} ${name}`.trim();
                         result[currentHeading].push(ingredient);
                     });
+                    
+                    if (currentHeading !== 'Main') {
+                        currentHeading = null;
+                    }
                 }
             });
 
@@ -51,8 +58,7 @@ async function getIngredients(page) {
         }
     );
 
-    ingredients = sections;
-    return ingredients;
+    return sections;
 }
 
 async function getSteps(page) {
