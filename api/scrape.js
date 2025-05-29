@@ -42,7 +42,7 @@ export async function scrapeRecipe(url) {
         });
 
         console.log('Page loaded, waiting for content...');
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         const pageTitle = await page.title();
         console.log('Page title:', pageTitle);

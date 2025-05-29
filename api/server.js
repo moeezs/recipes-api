@@ -28,7 +28,7 @@ app.get('/api', async (req, res) => {
         if (!res.headersSent) {
             res.status(504).json({ error: 'Request timeout - recipe took too long to scrape' });
         }
-    }, 25000);
+    }, 20000);
 
     try {
         const recipeData = await scrapeRecipe(url);

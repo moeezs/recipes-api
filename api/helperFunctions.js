@@ -1,10 +1,10 @@
 async function getTitle(page) {
-    await page.waitForSelector('.article-heading', { timeout: 10000 });
+    await page.waitForSelector('.article-heading', { timeout: 5000 });
     return await page.$eval('.article-heading', el => el.textContent.trim());
 }
 
 async function getDetails(page) {
-    await page.waitForSelector('.mm-recipes-details__content', { timeout: 10000 });
+    await page.waitForSelector('.mm-recipes-details__content', { timeout: 5000 });
     const detailItems = await page.$$('.mm-recipes-details__item');
     
     let details_stuff = {};
@@ -18,13 +18,15 @@ async function getDetails(page) {
 }
 
 async function getIngredients(page) {
-    await page.waitForSelector('#mm-recipes-structured-ingredients_1-0', { timeout: 10000 });
+    await page.waitForSelector('#mm-recipes-structured-ingredients_1-0', { timeout: 5000 });
     
-    const sections = await page.$$eval('#mm-recipes-structured-ingredients_1-0 .mm-recipes-structured-ingredients__list-heading, #mm-recipes-structured-ingredients_1-0 .mm-recipes-structured-ingredients__list',
-        (elements) => {
+    const sections = await page.$eval('#mm-recipes-structured-ingredients_1-0',
+        (container) => {
             let result = {};
             let currentHeading = null;
 
+            const elements = container.querySelectorAll('.mm-recipes-structured-ingredients__list-heading, .mm-recipes-structured-ingredients__list');
+            
             elements.forEach(element => {
                 if (element.classList.contains('mm-recipes-structured-ingredients__list-heading')) {
                     currentHeading = element.textContent.replace(':', '').trim();
@@ -59,11 +61,12 @@ async function getIngredients(page) {
 }
 
 async function getSteps(page) {
-    await page.waitForSelector('#mm-recipes-steps__content_1-0', { timeout: 10000 });
+    await page.waitForSelector('#mm-recipes-steps__content_1-0', { timeout: 5000 });
     
-    const stepsList = await page.$$eval('#mm-recipes-steps__content_1-0 ol li', 
-        (elements) => {
-            return elements.map((element, index) => {
+    const stepsList = await page.$eval('#mm-recipes-steps__content_1-0 ol', 
+        (orderList) => {
+            const elements = orderList.querySelectorAll('li');
+            return Array.from(elements).map((element, index) => {
                 const instruction = element.querySelector('p.mntl-sc-block-html')?.textContent.trim() || '';
                 const image = element.querySelector('img')?.getAttribute('data-src') || 
                              element.querySelector('img')?.getAttribute('src') || '';
@@ -82,10 +85,11 @@ async function getSteps(page) {
 
 async function getNutrition(page) {
     try {
-        await page.waitForSelector('#mm-recipes-nutrition-facts-summary_1-0', { timeout: 5000 });
+        await page.waitForSelector('#mm-recipes-nutrition-facts-summary_1-0', { timeout: 3000 });
         
-        const nutritionData = await page.$$eval('#mm-recipes-nutrition-facts-summary_1-0 table tbody tr', 
-            (rows) => {
+        const nutritionData = await page.$eval('#mm-recipes-nutrition-facts-summary_1-0 table tbody', 
+            (tbody) => {
+                const rows = tbody.querySelectorAll('tr');
                 let result = {};
                 rows.forEach(row => {
                     const cells = row.querySelectorAll('td');
@@ -101,39 +105,57 @@ async function getNutrition(page) {
         
         return nutritionData;
     } catch (error) {
+        console.log('Nutrition section not found, skipping...');
         return {};
     }
 }
 
 export async function getRecipeData(page) {
-        console.log('Starting recipe data extraction...');
+    console.log('Starting parallel recipe data extraction...');
     
-    const bodyContent = await page.evaluate(() => {
-        const body = document.body.innerText;
-        return body.substring(0, 500); // First 500 chars
-    });
-    console.log('Page content preview:', bodyContent);
-    
-    const title = await getTitle(page);
-    console.log('✓ Title extracted');
-    
-    const details = await getDetails(page);
-    console.log('✓ Details extracted');
-    
-    const ingredients = await getIngredients(page);
-    console.log('✓ Ingredients extracted');
-    
-    const steps = await getSteps(page);
-    console.log('✓ Steps extracted');
-    
-    const nutrition = await getNutrition(page);
-    console.log('✓ Nutrition extracted');
+    try {
+        // First, wait for key elements to be available
+        await Promise.race([
+            page.waitForSelector('.article-heading', { timeout: 5000 }),
+            page.waitForSelector('.mm-recipes-details__content', { timeout: 5000 })
+        ]);
+        
+        console.log('Page loaded, starting parallel extraction...');
+        
+        const [title, details, ingredients, steps, nutrition] = await Promise.allSettled([
+            getTitle(page).catch(err => {
+                console.log('Title extraction failed:', err.message);
+                return 'Recipe Title Not Found';
+            }),
+            getDetails(page).catch(err => {
+                console.log('Details extraction failed:', err.message);
+                return {};
+            }),
+            getIngredients(page).catch(err => {
+                console.log('Ingredients extraction failed:', err.message);
+                return {};
+            }),
+            getSteps(page).catch(err => {
+                console.log('Steps extraction failed:', err.message);
+                return [];
+            }),
+            getNutrition(page).catch(err => {
+                console.log('Nutrition extraction failed:', err.message);
+                return {};
+            })
+        ]);
 
-    return {
-        title,
-        details,
-        ingredients,
-        steps,
-        nutrition
-    };
+        console.log('All extractions completed');
+
+        return {
+            title: title.status === 'fulfilled' ? title.value : 'Recipe Title Not Found',
+            details: details.status === 'fulfilled' ? details.value : {},
+            ingredients: ingredients.status === 'fulfilled' ? ingredients.value : {},
+            steps: steps.status === 'fulfilled' ? steps.value : [],
+            nutrition: nutrition.status === 'fulfilled' ? nutrition.value : {}
+        };
+    } catch (error) {
+        console.error('Recipe extraction failed:', error);
+        throw new Error(`Recipe extraction failed: ${error.message}`);
+    }
 }
