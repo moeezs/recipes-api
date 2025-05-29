@@ -1,18 +1,16 @@
 async function getTitle(page) {
-    const title = await page.locator('.article-heading').waitHandle()
-    const accessedTitle = await title?.evaluate(el => el.textContent);
-    return accessedTitle;
+    await page.waitForSelector('.article-heading', { timeout: 15000 });
+    return await page.$eval('.article-heading', el => el.textContent.trim());
 }
 
 async function getDetails(page) {
+    await page.waitForSelector('.mm-recipes-details__content', { timeout: 15000 });
+    const detailItems = await page.$$('.mm-recipes-details__item');
+    
     let details_stuff = {};
-    const detailsContainer = await page.locator('.mm-recipes-details__content').waitHandle();
-    const detailItems = await detailsContainer.$$('.mm-recipes-details__item');
-
     for (const item of detailItems) {
         const label = await item.$eval('.mm-recipes-details__label', el => el.textContent.trim());
         const value = await item.$eval('.mm-recipes-details__value', el => el.textContent.trim());
-
         const key = label.replace(':', '').replace(/\s+(.)/g, (match, letter) => letter.toUpperCase()).replace(/^\w/, c => c.toLowerCase());
         details_stuff[key] = value;
     }
@@ -20,10 +18,9 @@ async function getDetails(page) {
 }
 
 async function getIngredients(page) {
-    await page.waitForSelector('#mm-recipes-structured-ingredients_1-0', { timeout: 30000 });
-    const ingredientsContainer = await page.locator('#mm-recipes-structured-ingredients_1-0').waitHandle();
-
-    const sections = await ingredientsContainer.$$eval('.mm-recipes-structured-ingredients__list-heading, .mm-recipes-structured-ingredients__list',
+    await page.waitForSelector('#mm-recipes-structured-ingredients_1-0', { timeout: 15000 });
+    
+    const sections = await page.$$eval('#mm-recipes-structured-ingredients_1-0 .mm-recipes-structured-ingredients__list-heading, #mm-recipes-structured-ingredients_1-0 .mm-recipes-structured-ingredients__list',
         (elements) => {
             let result = {};
             let currentHeading = null;
@@ -62,12 +59,9 @@ async function getIngredients(page) {
 }
 
 async function getSteps(page) {
-    let steps = [];
-
-    await page.waitForSelector('#mm-recipes-steps__content_1-0', { timeout: 30000 });
-    const stepsContainer = await page.locator('#mm-recipes-steps__content_1-0').waitHandle();
-
-    const stepsList = await stepsContainer.$$eval('ol li', 
+    await page.waitForSelector('#mm-recipes-steps__content_1-0', { timeout: 15000 });
+    
+    const stepsList = await page.$$eval('#mm-recipes-steps__content_1-0 ol li', 
         (elements) => {
             return elements.map((element, index) => {
                 const instruction = element.querySelector('p.mntl-sc-block-html')?.textContent.trim() || '';
@@ -83,18 +77,14 @@ async function getSteps(page) {
         }
     );
 
-    steps = stepsList;
-    return steps;
+    return stepsList;
 }
 
 async function getNutrition(page) {
-    let nutrition = {};
-
     try {
-        await page.waitForSelector('#mm-recipes-nutrition-facts-summary_1-0', { timeout: 10000 });
-        const nutritionContainer = await page.locator('#mm-recipes-nutrition-facts-summary_1-0').waitHandle();
+        await page.waitForSelector('#mm-recipes-nutrition-facts-summary_1-0', { timeout: 8000 });
         
-        const nutritionData = await nutritionContainer.$$eval('table tbody tr', 
+        const nutritionData = await page.$$eval('#mm-recipes-nutrition-facts-summary_1-0 table tbody tr', 
             (rows) => {
                 let result = {};
                 rows.forEach(row => {
@@ -109,13 +99,11 @@ async function getNutrition(page) {
             }
         );
         
-        nutrition = nutritionData;
+        return nutritionData;
     } catch (error) {
         console.log('Nutrition facts not found or failed to load');
-        nutrition = {};
+        return {};
     }
-
-    return nutrition;
 }
 
 export async function getRecipeData(page) {

@@ -8,18 +8,26 @@ export async function scrapeRecipe(url) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: true,
-            timeout: 60000,
+            headless: 'new',
+            timeout: 30000,
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-background-timer-throttling',
+                '--disable-backgrounding-occluded-windows',
+                '--disable-renderer-backgrounding',
+                '--no-first-run',
+                '--no-default-browser-check',
+                '--single-process'
             ],
         });
 
         const page = await browser.newPage();
+
         await page.goto(url, {
-            waitUntil: 'domcontentloaded',
-            timeout: 60000,
+            waitUntil: 'networkidle0',
+            timeout: 45000,
         });
 
         await page.setViewport({ width: 1080, height: 1024 });
