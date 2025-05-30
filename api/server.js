@@ -51,11 +51,9 @@ app.get('/api', async (req, res) => {
     }
 });
 
-// Serve static files from the React app build directory
-const frontendDistPath = path.join(__dirname, '..', 'frontend', 'dist');
+const frontendDistPath = path.join(__dirname, '..', 'dist');
 app.use(express.static(frontendDistPath));
 
-// Handle React routing - serve index.html for any routes that don't match API or static files
 app.use((req, res) => {
     res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
