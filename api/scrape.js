@@ -9,7 +9,8 @@ export async function scrapeRecipe(url) {
     try {
         browser = await puppeteer.launch({
             headless: 'new',
-            timeout: 20000,
+            timeout: 15000,
+            protocolTimeout: 10000,
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
@@ -20,7 +21,8 @@ export async function scrapeRecipe(url) {
                 '--no-first-run',
                 '--disable-default-apps',
                 '--memory-pressure-off',
-                '--max_old_space_size=4096'
+                '--max_old_space_size=2048',
+                '--single-process'
             ],
         });
 
@@ -37,10 +39,10 @@ export async function scrapeRecipe(url) {
         
         await page.goto(url, {
             waitUntil: 'domcontentloaded',
-            timeout: 20000,
+            timeout: 15000,
         });
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         const pageTitle = await page.title();
         

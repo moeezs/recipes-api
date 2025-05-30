@@ -1,5 +1,5 @@
 async function getTitle(page) {
-    await page.waitForSelector('.article-heading', { timeout: 5000 });
+    await page.waitForSelector('.article-heading', { timeout: 3000 });
     return await page.$eval('.article-heading', el => el.textContent.trim());
 }
 
@@ -113,8 +113,8 @@ export async function getRecipeData(page) {
     
     try {
         await Promise.race([
-            page.waitForSelector('.article-heading', { timeout: 5000 }),
-            page.waitForSelector('.mm-recipes-details__content', { timeout: 5000 })
+            page.waitForSelector('.article-heading', { timeout: 3000 }),
+            page.waitForSelector('.mm-recipes-details__content', { timeout: 3000 })
         ]);
         
         const [title, details, ingredients, steps, nutrition] = await Promise.allSettled([
