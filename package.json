@@ -6,6 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "node api/server.js",
+    "build": "cd frontend && npm install && npm run build",
+    "railway-build": "npm run build",
+    "dev": "cd frontend && npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "AMS",

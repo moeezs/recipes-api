@@ -1,6 +1,11 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import { scrapeRecipe } from './scrape.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,6 +20,7 @@ const limiter = rateLimit({
 
 app.use('/api', limiter);
 
+// API route
 app.get('/api', async (req, res) => {
     const url = req.query.url;
 
@@ -45,6 +51,17 @@ app.get('/api', async (req, res) => {
     }
 });
 
+// Serve static files from the React app build directory
+const frontendDistPath = path.join(__dirname, '..', 'frontend', 'dist');
+app.use(express.static(frontendDistPath));
+
+// Handle React routing - serve index.html for any routes that don't match API or static files
+app.use((req, res) => {
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port: ${PORT}`);
+  console.log(`Frontend available at: http://localhost:${PORT}`);
+  console.log(`API available at: http://localhost:${PORT}/api`);
 }); 
