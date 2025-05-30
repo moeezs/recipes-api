@@ -110,7 +110,13 @@ async function getNutrition(page) {
 }
 
 export async function getRecipeData(page) {
+    
     try {
+        await Promise.race([
+            page.waitForSelector('.article-heading', { timeout: 5000 }),
+            page.waitForSelector('.mm-recipes-details__content', { timeout: 5000 })
+        ]);
+        
         const [title, details, ingredients, steps, nutrition] = await Promise.allSettled([
             getTitle(page).catch(err => {
                 return 'Recipe Title Not Found';
@@ -129,6 +135,7 @@ export async function getRecipeData(page) {
             })
         ]);
 
+
         return {
             title: title.status === 'fulfilled' ? title.value : 'Recipe Title Not Found',
             details: details.status === 'fulfilled' ? details.value : {},
@@ -137,6 +144,7 @@ export async function getRecipeData(page) {
             nutrition: nutrition.status === 'fulfilled' ? nutrition.value : {}
         };
     } catch (error) {
+        console.error('Recipe extraction failed:', error);
         throw new Error(`Recipe extraction failed: ${error.message}`);
     }
 }
