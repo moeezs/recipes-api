@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "start": "node api/server.js",
     "server": "node api/server.js",
-    "postinstall": "npm run build",
+    "postinstall": "echo Running postinstall && npm run build",
     "lint": "eslint ."
   },
   "dependencies": {
