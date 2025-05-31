@@ -1,6 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom'
-import { ChefHat, Code2, Play, BookOpen, ExternalLink, Copy, Check } from 'lucide-react'
+import { ChefHat, Code2, Play, BookOpen, ExternalLink, Copy, Check, Star } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
@@ -83,6 +83,7 @@ const sampleResponse = {
 // Navigation Component
 function Navigation() {
   const location = useLocation()
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
   
   const navItems = [
     { path: '/', label: 'Home', icon: ChefHat },
@@ -100,6 +101,7 @@ function Navigation() {
             <span>Recipe API</span>
           </Link>
           
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => {
               const Icon = item.icon
@@ -119,7 +121,46 @@ function Navigation() {
               )
             })}
           </div>
+
+          {/* Mobile hamburger menu button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </Button>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t bg-white/95 backdrop-blur">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              {navItems.map((item) => {
+                const Icon = item.icon
+                const isActive = location.pathname === item.path
+                return (
+                  <Button
+                    key={item.path}
+                    variant={isActive ? "default" : "ghost"}
+                    size="sm"
+                    asChild
+                    className="w-full justify-start"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Link to={item.path} className="flex items-center space-x-2">
+                      <Icon className="h-4 w-4" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </Button>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   )
@@ -282,7 +323,7 @@ function DocsPage() {
   const baseUrl = "https://recipes-api-production-6853.up.railway.app"
   
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 max-w-5xl">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div className="space-y-12">
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-4">API Documentation</h1>
@@ -380,14 +421,14 @@ function DocsPage() {
 
                   <div>
                     <h4 className="font-semibold mb-3 text-base">Example Request</h4>
-                    <div className="text-xs sm:text-sm">
+                    <div className="text-xs sm:text-sm overflow-x-auto">
                       <CodeBlock code={`curl "${baseUrl}/api?url=https://www.allrecipes.com/recipe/238654/brookies-brownie-cookies/"`} language="bash" />
                     </div>
                   </div>
 
                   <div>
                     <h4 className="font-semibold mb-3 text-base">Response Format</h4>
-                    <div className="text-xs sm:text-sm">
+                    <div className="text-xs sm:text-sm overflow-x-auto w-full max-w-full">
                       <CodeBlock code={JSON.stringify({
                         title: "string",
                         details: {
@@ -728,9 +769,9 @@ function App() {
                 © 2025 Recipe Scraper API. Built by <span className="font-medium text-foreground">Abdul Moeez Shaikh</span>
               </p>
               <Button variant="ghost" size="sm" asChild>
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 text-muted-foreground hover:text-foreground">
-                  <ExternalLink className="h-4 w-4" />
-                  <span>GitHub</span>
+                <a href="https://github.com/moeezs/recipes-api" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 text-muted-foreground hover:text-foreground">
+                  <Star className="h-4 w-4" />
+                  <span>Star on GitHub</span>
                 </a>
               </Button>
             </div>
