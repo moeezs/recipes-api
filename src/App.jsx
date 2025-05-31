@@ -393,12 +393,12 @@ function DocsPage() {
                         </div>
                       </div>
                       <div className="hidden sm:block overflow-x-auto">
-                        <table className="w-full min-w-[500px]">
+                        <table className="w-full">
                           <thead>
                             <tr className="bg-slate-50 border-b">
-                              <th className="text-left p-3 text-sm font-medium w-20">Name</th>
-                              <th className="text-left p-3 text-sm font-medium w-20">Type</th>
-                              <th className="text-left p-3 text-sm font-medium w-24">Required</th>
+                              <th className="text-left p-3 text-sm font-medium">Name</th>
+                              <th className="text-left p-3 text-sm font-medium">Type</th>
+                              <th className="text-left p-3 text-sm font-medium">Required</th>
                               <th className="text-left p-3 text-sm font-medium">Description</th>
                             </tr>
                           </thead>
@@ -421,14 +421,14 @@ function DocsPage() {
 
                   <div>
                     <h4 className="font-semibold mb-3 text-base">Example Request</h4>
-                    <div className="text-xs sm:text-sm overflow-x-auto">
+                    <div className="overflow-x-auto">
                       <CodeBlock code={`curl "${baseUrl}/api?url=https://www.allrecipes.com/recipe/238654/brookies-brownie-cookies/"`} language="bash" />
                     </div>
                   </div>
 
                   <div>
                     <h4 className="font-semibold mb-3 text-base">Response Format</h4>
-                    <div className="text-xs sm:text-sm overflow-x-auto w-full max-w-full">
+                    <div className="overflow-x-auto">
                       <CodeBlock code={JSON.stringify({
                         title: "string",
                         details: {
@@ -477,7 +477,7 @@ function DocsPage() {
                       <Badge variant="destructive">{errorCase.code}</Badge>
                       <span className="font-medium">{errorCase.title}</span>
                     </div>
-                    <div className="text-xs sm:text-sm">
+                    <div className="overflow-x-auto">
                       <CodeBlock code={JSON.stringify({ error: errorCase.error }, null, 2)} language="json" />
                     </div>
                   </div>
