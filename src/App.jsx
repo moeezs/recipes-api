@@ -323,7 +323,7 @@ function DocsPage() {
   const baseUrl = "https://recipes-api-production-6853.up.railway.app"
   
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 max-w-6-xl">
       <div className="space-y-12">
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-4">API Documentation</h1>
